@@ -1,5 +1,6 @@
 import { useState, useMemo, useRef, useEffect } from "react";
 import { motion } from "framer-motion";
+import emailjs from "@emailjs/browser";
 import {
   Send,
   Loader2,
@@ -258,16 +259,75 @@ export default function Contact() {
         description: formData.description.trim(),
       };
 
-      const res = await fetch("/api/send-email", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+      let serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID?.trim();
+      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID?.trim();
+      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY?.trim();
 
-      const data = await res.json().catch(() => ({}));
+      if (serviceId && serviceId.startsWith("sservice_")) {
+        serviceId = serviceId.replace(/^sservice_/, "service_");
+      }
 
-      if (!res.ok) {
-        throw new Error(data.error || "Email delivery failed");
+      let emailSent = false;
+
+      if (serviceId && templateId && publicKey) {
+        try {
+          // Send directly via EmailJS SDK
+          await emailjs.send(
+            serviceId,
+            templateId,
+            {
+              name: formData.name.trim(),
+              email: formData.email.trim(),
+              phone: fullPhone || "Not provided",
+              projectType: formData.projectType,
+              budget: finalBudget,
+              description: formData.description.trim(),
+              to_email: "maranmedia18@gmail.com",
+            },
+            publicKey
+          );
+          emailSent = true;
+        } catch (emailJsErr: any) {
+          console.warn("EmailJS send failed, attempting fallback API endpoint:", emailJsErr);
+          const endpoint = import.meta.env.PROD
+            ? "/.netlify/functions/send-email"
+            : "/api/send-email";
+
+          try {
+            const res = await fetch(endpoint, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(payload),
+            });
+            const data = await res.json().catch(() => ({}));
+            if (res.ok) {
+              emailSent = true;
+            } else {
+              throw new Error(data.error || emailJsErr?.text || emailJsErr?.message || "Email delivery failed");
+            }
+          } catch {
+            throw emailJsErr;
+          }
+        }
+      }
+
+      if (!emailSent) {
+        // Fallback to Netlify function / Vite API server
+        const endpoint = import.meta.env.PROD
+          ? "/.netlify/functions/send-email"
+          : "/api/send-email";
+
+        const res = await fetch(endpoint, {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload),
+        });
+
+        const data = await res.json().catch(() => ({}));
+
+        if (!res.ok) {
+          throw new Error(data.error || "Email delivery failed");
+        }
       }
 
       // Success
@@ -295,8 +355,11 @@ export default function Contact() {
       }, 5000);
     } catch (err: any) {
       console.error("Submission failed:", err);
+      const detail = err?.text || err?.message || "Email delivery failed";
       setErrorMessage(
-        "We couldn't send your message right now. Please try again in a moment or email maranmedia18@gmail.com directly."
+        import.meta.env.DEV
+          ? `Error: ${detail}`
+          : "We couldn't send your message right now. Please try again in a moment or email maranmedia18@gmail.com directly."
       );
     } finally {
       setIsSubmitting(false);

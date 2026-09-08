@@ -28,3 +28,6 @@ dist-ssr
 
 # Portfolio videos - hosted separately
 public/Videos/
+
+# Local Netlify folder
+.netlify

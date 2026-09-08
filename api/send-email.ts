@@ -148,14 +148,13 @@ ${submissionDate}
           <td style="padding: 10px 0; border-bottom: 1px solid #222; color: #999;"><strong>Budget:</strong></td>
           <td style="padding: 10px 0; border-bottom: 1px solid #222; color: #fff; font-weight: bold;">${budget}</td>
         </tr>
-        ${
-          currencyDisplay
-            ? `<tr>
+        ${currencyDisplay
+      ? `<tr>
           <td style="padding: 10px 0; border-bottom: 1px solid #222; color: #999;"><strong>Currency:</strong></td>
           <td style="padding: 10px 0; border-bottom: 1px solid #222; color: #fff; font-weight: 500;">${currencyDisplay}</td>
         </tr>`
-            : ""
-        }
+      : ""
+    }
         <tr>
           <td style="padding: 10px 0; border-bottom: 1px solid #222; color: #999;"><strong>Submitted:</strong></td>
           <td style="padding: 10px 0; border-bottom: 1px solid #222; color: #aaa;">${submissionDate}</td>
@@ -172,7 +171,7 @@ ${submissionDate}
   const resendApiKey = process.env.RESEND_API_KEY;
   if (resendApiKey) {
     const resendFrom = process.env.RESEND_FROM || "onboarding@resend.dev";
-    
+
     // Send admin email
     const adminRes = await fetch("https://api.resend.com/emails", {
       method: "POST",
