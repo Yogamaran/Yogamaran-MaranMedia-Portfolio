@@ -26,8 +26,5 @@ dist-ssr
 *.sln
 *.sw?
 
-# Portfolio videos - hosted separately
-public/Videos/
-
 # Local Netlify folder
 .netlify
