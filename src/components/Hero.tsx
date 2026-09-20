@@ -193,7 +193,7 @@ export default function Hero() {
               content, cinematic edits, motion graphics, and visual
               storytelling. I turn raw footage into engaging content that
               captures attention and keeps audiences watching without
-              scrolling .
+              scrolling.
             </motion.p>
 
             {/* CTA */}

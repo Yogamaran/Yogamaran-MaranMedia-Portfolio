@@ -267,7 +267,10 @@ export default async function handler(req: any, res: any) {
   }
 
   try {
-    const payload: EmailPayload = typeof req.body === "string" ? JSON.parse(req.body) : req.body;
+    const payload: EmailPayload =
+      typeof req.body === "string" && req.body.trim()
+        ? JSON.parse(req.body)
+        : req.body || {};
     const result = await processSendEmail(payload);
     return res.status(200).json(result);
   } catch (error: any) {

@@ -1,4 +1,4 @@
-import { processSendEmail, type EmailPayload } from "../../api/send-email.ts";
+import { processSendEmail, type EmailPayload } from "../../api/send-email";
 
 interface HandlerEvent {
   httpMethod?: string;
