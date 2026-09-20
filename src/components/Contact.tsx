@@ -259,9 +259,9 @@ export default function Contact() {
         description: formData.description.trim(),
       };
 
-      let serviceId = import.meta.env.VITE_EMAILJS_SERVICE_ID?.trim();
-      const templateId = import.meta.env.VITE_EMAILJS_TEMPLATE_ID?.trim();
-      const publicKey = import.meta.env.VITE_EMAILJS_PUBLIC_KEY?.trim();
+      let serviceId = (import.meta.env.VITE_EMAILJS_SERVICE_ID || "service_5vjq6ow").trim();
+      const templateId = (import.meta.env.VITE_EMAILJS_TEMPLATE_ID || "template_sclze5b").trim();
+      const publicKey = (import.meta.env.VITE_EMAILJS_PUBLIC_KEY || "eRY1gLc6Y7mUKLEh4").trim();
 
       if (serviceId && serviceId.startsWith("sservice_")) {
         serviceId = serviceId.replace(/^sservice_/, "service_");
@@ -272,20 +272,26 @@ export default function Contact() {
       if (serviceId && templateId && publicKey) {
         try {
           // Send directly via EmailJS SDK
-          await emailjs.send(
-            serviceId,
-            templateId,
-            {
-              name: formData.name.trim(),
-              email: formData.email.trim(),
-              phone: fullPhone || "Not provided",
-              projectType: formData.projectType,
-              budget: finalBudget,
-              description: formData.description.trim(),
-              to_email: "maranmedia18@gmail.com",
-            },
-            publicKey
-          );
+          const templateParams = {
+            name: formData.name.trim(),
+            from_name: formData.name.trim(),
+            user_name: formData.name.trim(),
+            email: formData.email.trim(),
+            from_email: formData.email.trim(),
+            reply_to: formData.email.trim(),
+            user_email: formData.email.trim(),
+            phone: fullPhone || "Not provided",
+            phone_number: fullPhone || "Not provided",
+            contact_number: fullPhone || "Not provided",
+            projectType: formData.projectType,
+            project_type: formData.projectType,
+            budget: finalBudget,
+            description: formData.description.trim(),
+            message: formData.description.trim(),
+            to_email: "maranmedia18@gmail.com",
+          };
+
+          await emailjs.send(serviceId, templateId, templateParams, publicKey);
           emailSent = true;
         } catch (emailJsErr: any) {
           console.warn("EmailJS send failed, attempting fallback API endpoint:", emailJsErr);
